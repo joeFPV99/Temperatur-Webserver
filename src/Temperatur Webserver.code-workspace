@@ -3,6 +3,10 @@
 		{
 			"name": "Temperatur Webserver",
 			"path": ".."
+		},
+		{
+			"name": "LoveBox",
+			"path": "../../LoveBox"
 		}
 	],
 	"settings": {}
