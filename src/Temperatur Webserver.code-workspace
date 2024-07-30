@@ -3,11 +3,9 @@
 		{
 			"name": "Temperatur Webserver",
 			"path": ".."
-		},
-		{
-			"name": "LoveBox",
-			"path": "../../LoveBox"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Temperatur Webserver"
+	}
 }
