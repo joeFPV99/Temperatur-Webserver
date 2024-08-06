@@ -3,20 +3,32 @@ window.addEventListener('load', getReadings);
 
 // Create Temperature Chart
 var chartT = new Highcharts.Chart({
-  chart:{
-    renderTo:'chart-temperature'
+  chart: {
+    renderTo: 'chart-temperature'
   },
   series: [
     {
-      name: 'Temperature #1',
+      name: 'Temperature Chamber',
       type: 'line',
       color: '#00A6A6',
       marker: {
         symbol: 'circle',
         radius: 3,
         fillColor: '#00A6A6',
-      }
+      },
+      yAxis: 0 // Use the first y-axis
     },
+    {
+      name: 'RTD Value',
+      type: 'line',
+      color: '#FF5733',
+      marker: {
+        symbol: 'triangle',
+        radius: 3,
+        fillColor: '#FF5733',
+      },
+      yAxis: 1 // Use the second y-axis
+    }
   ],
   title: {
     text: undefined
@@ -25,15 +37,26 @@ var chartT = new Highcharts.Chart({
     type: 'datetime',
     dateTimeLabelFormats: { second: '%H:%M:%S' }
   },
-  yAxis: {
-    title: {
-      text: 'Temperature Celsius Degrees'
+  yAxis: [
+    {
+      title: {
+        text: 'Temperature [°C]',
+        color: '#00A6A6'
+      }
+    },
+    {
+      title: {
+        text: 'RTD Value [Ohm]',
+        color:'#FF5733'
+      },
+      opposite: true // Position the second y-axis on the right
     }
-  },
+  ],
   credits: {
     enabled: false
   }
 });
+
 
 
 //Plot temperature in the temperature chart

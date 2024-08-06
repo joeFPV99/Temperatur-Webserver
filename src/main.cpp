@@ -5,27 +5,29 @@
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_Sensor.h>
 #include <ESPAsyncTCP.h>
-#include "ESPAsyncWebServer.h"
+#include <ESPAsyncWebServer.h>
 #include <ESP8266WiFi.h>
 #include "Adafruit_MAX31865.h"
 #include <Arduino_JSON.h>
-#include "LittleFS.h"
+#include <LittleFS.h>
 #include <string.h>
 #include <array>
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_RESET -1
+constexpr int SCREEN_WIDTH = 128;
+constexpr int SCREEN_HEIGHT =  64;
+constexpr int OLED_RESET = -1;
 
 //CHANGE defines !!
-#define SPI_CS 1
-#define SPI_MOSI 1
-#define SPI_MISO 1
-#define SPI_CLK 1
+constexpr int SPI_CS = 1;
+constexpr int SPI_MOSI = 1;
+constexpr int SPI_MISO = 1;
+constexpr int SPI_CLK = 1;
 
-#define RREF 430 //PT100 uses 430Ohm on the PCB 
+constexpr int RREF = 430; //PT100 uses 430Ohm on the PCB 
 
 using namespace std;
+
+array<uint16_t,2> tempAndRTD;
 
 //timer variables 
  unsigned long lastTime = 0;
@@ -83,8 +85,8 @@ void initOLED () {
 
 // Check and print any faults
 String dispFault(){
-
   uint8_t fault = MAX4Wire.readFault();
+  //checks if fault is non zero
   if (fault) {
     Serial.print("Fault 0x"); 
     Serial.println(fault, HEX);
@@ -108,7 +110,8 @@ String dispFault(){
     }
     MAX4Wire.clearFault();
   }
-
+//returns "no fault" if the fault is indeed zero
+return "No fault detected!";
 }
 
 //get sensor reading for JSON
@@ -128,24 +131,10 @@ array<uint16_t,2> getSensorReadingOLED(){
     return{valueRTD, valueTemp};
 }
 
-/*****************************************************************************************/
 
-
-void setup() {
-    Serial.begin(74880);
-    while (!Serial)
-    {
-    }
-
-    //initialize MAX31865 in 4 wire mode
-    MAX4Wire.begin(MAX31865_4WIRE);
-
-    //initialize WIFI, FileSystem & OLED screen 
-    initWiFi();
-    initLittleFS();
-    initOLED();
-
-  // Web Server Root URL
+//set up the server
+void setUpServer(){
+    // Web Server Root URL
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(LittleFS, "/index.html", "text/html");
     });
@@ -170,19 +159,38 @@ void setup() {
 
   // Start server
   server.begin();
+}
 
+
+
+
+
+/*****************************************************************************************/
+
+
+void setup() {
+    Serial.begin(74880);
+    while (!Serial){}
+
+    //initialize MAX31865 in 4 wire mode
+    MAX4Wire.begin(MAX31865_4WIRE);
+
+    //initialize WIFI, FileSystem , OLED screen & set up Server
+    initWiFi();
+    initLittleFS();
+    initOLED();
+    setUpServer();
 }
 
 
 void loop() {
-    Serial.print("Test for Monitor");
-    
-    //clear any HW faults and checks for new ones 
+
+    //clear any preliminary HW faults and checks for new ones 
     MAX4Wire.clearFault();
     String faultToDisp = dispFault();
 
-    //get temp & RTD value
-    array<uint16_t,2> tempAndRTD = getSensorReadingOLED();
+    //get temp & RTD value for printing on the
+    tempAndRTD = getSensorReadingOLED();
 
     OLED.setCursor(0,0);
     OLED.println("Temperatur: \n" + String(tempAndRTD[0]));
